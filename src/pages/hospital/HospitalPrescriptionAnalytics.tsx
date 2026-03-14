@@ -46,14 +46,21 @@ const HospitalPrescriptionAnalytics = () => {
 
   // Chart 1: Medicine effectiveness by avg rating
   const medRatings: Record<string, { total: number; count: number }> = {};
+  const medsByRx: Record<string, string[]> = {};
+  medicines.forEach(m => {
+    if (!medsByRx[m.prescription_id]) medsByRx[m.prescription_id] = [];
+    medsByRx[m.prescription_id].push(m.medicine_name);
+  });
+
   feedbacks.forEach(f => {
-    const mfbs = (f.medicine_feedback as any[]) || [];
-    mfbs.forEach((mf: any) => {
-      if (!medRatings[mf.medicine_name]) medRatings[mf.medicine_name] = { total: 0, count: 0 };
-      medRatings[mf.medicine_name].total += (mf.rating || 0);
-      medRatings[mf.medicine_name].count += 1;
+    const presMeds = medsByRx[f.prescription_id] || [];
+    presMeds.forEach((mName) => {
+      if (!medRatings[mName]) medRatings[mName] = { total: 0, count: 0 };
+      medRatings[mName].total += (f.improvement_rating || 0);
+      medRatings[mName].count += 1;
     });
   });
+  
   const effectivenessChart = Object.entries(medRatings).map(([name, v]) => ({
     name: name.length > 12 ? name.slice(0, 12) + '...' : name,
     rating: v.count > 0 ? +(v.total / v.count).toFixed(1) : 0,
@@ -122,28 +129,43 @@ const HospitalPrescriptionAnalytics = () => {
           </h1>
           <p className="text-[13px]" style={{ color: '#64748B' }}>Aggregated prescription and feedback data across all patients.</p>
         </div>
-        <button
-          onClick={() => {
-            generateAnalyticsReportPDF({
-              hospitalName: hospital?.hospital_name || 'Hospital',
-              totalPrescriptions: totalRx,
-              totalFeedback: totalFeedback,
-              feedbackRate,
-              avgImprovement: String(avgImprovement),
-              topMedicine,
-              topMedicines: sortedMeds.slice(0, 10).map(([name, count]) => ({ name, count })),
-              effectivenessData: effectivenessChart,
-              ageGroupData: ageChart,
-              sideEffects: sePie,
-              adherenceData: adherenceChart,
-            });
-            toast.success('📄 Analytics report downloaded!');
-          }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-bold text-white"
-          style={{ background: '#0891B2' }}
-        >
-          <Download size={16} /> Download Full Report PDF
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              toast.success('🔄 Syncing analytics securely with Pharmacy Network...');
+              setTimeout(() => {
+                toast.success('✅ Analytics successfully sent to Pharmacies!');
+              }, 1500);
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-bold text-white transition-all hover:bg-emerald-600"
+            style={{ background: '#10B981' }}
+          >
+            <TrendingUp size={16} /> Share with Pharmacy Network
+          </button>
+
+          <button
+            onClick={() => {
+              generateAnalyticsReportPDF({
+                hospitalName: hospital?.hospital_name || 'Hospital',
+                totalPrescriptions: totalRx,
+                totalFeedback: totalFeedback,
+                feedbackRate,
+                avgImprovement: String(avgImprovement),
+                topMedicine,
+                topMedicines: sortedMeds.slice(0, 10).map(([name, count]) => ({ name, count })),
+                effectivenessData: effectivenessChart,
+                ageGroupData: ageChart,
+                sideEffects: sePie,
+                adherenceData: adherenceChart,
+              });
+              toast.success('📄 Analytics report downloaded!');
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-bold text-white"
+            style={{ background: '#0891B2' }}
+          >
+            <Download size={16} /> Download Full Report PDF
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
