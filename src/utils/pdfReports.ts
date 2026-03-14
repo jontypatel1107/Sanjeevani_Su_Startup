@@ -792,3 +792,127 @@ export function generatePatientProfilePDF(data: {
   addFooter(doc);
   doc.save(`Patient_Profile_${data.fullName.replace(/\s/g, '_')}_${format(new Date(), 'yyyyMMdd')}.pdf`);
 }
+
+/* =====================================================
+   5. PHARMACY ALERT REPORT PDF (ANONYMOUS)
+   ===================================================== */
+export function generatePharmacyAlertReportPDF(data: {
+  diagnosis: string;
+  feedback: {
+    improvement_rating: number;
+    adherence_rating: string;
+    symptoms_resolved: boolean;
+    pain_level_before: number;
+    pain_level_after: number;
+    had_side_effects: boolean;
+    side_effects: string[];
+    side_effect_severity?: string;
+  };
+}) {
+  const doc = new jsPDF();
+  const w = doc.internal.pageSize.getWidth();
+  const fb = data.feedback;
+  const ratingLabels = ['', 'Much worse', 'Worse', 'Same', 'Better', 'Much better'];
+
+  // Anonymous Header
+  doc.setFillColor(...COLORS.primary);
+  doc.rect(0, 0, w, 4, 'F');
+  doc.setFillColor(...COLORS.accent);
+  doc.rect(0, 4, w, 1.5, 'F');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(20);
+  doc.setTextColor(...COLORS.primary);
+  doc.text('Pharmacy Medication Feedback Alert', 14, 20);
+  
+  doc.setDrawColor(...COLORS.red);
+  doc.setLineWidth(0.5);
+  doc.line(14, 26, w - 14, 26);
+
+  doc.setFontSize(9);
+  doc.setTextColor(...COLORS.gray);
+  doc.text(`Generated: ${format(new Date(), 'dd MMM yyyy, hh:mm a')}`, 14, 34);
+  
+  let y = 46;
+
+  // Diagnosis box
+  doc.setFillColor(...COLORS.lightBg);
+  doc.roundedRect(14, y, w - 28, 16, 2, 2, 'F');
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...COLORS.dark);
+  doc.text('Condition / Diagnosis:', 18, y + 10);
+  doc.setFont('helvetica', 'normal');
+  doc.text(data.diagnosis || 'Not specified', 62, y + 10);
+  y += 26;
+
+  // Rating cards
+  const cardW = (w - 42) / 3;
+  const cards = [
+    { label: 'Improvement', value: ratingLabels[fb.improvement_rating] || '--', color: COLORS.green },
+    { label: 'Adherence', value: fb.adherence_rating, color: COLORS.primary },
+    { label: 'Pain Change', value: `${fb.pain_level_before} -> ${fb.pain_level_after}`, color: fb.pain_level_before > fb.pain_level_after ? COLORS.green : fb.pain_level_before < fb.pain_level_after ? COLORS.red : COLORS.gray },
+  ];
+
+  cards.forEach((c, i) => {
+    const x = 14 + i * (cardW + 7);
+    doc.setFillColor(...c.color);
+    doc.roundedRect(x, y, cardW, 22, 2, 2, 'F');
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...COLORS.white);
+    doc.text(c.label, x + cardW / 2, y + 8, { align: 'center' });
+    doc.setFontSize(12);
+    doc.text(c.value, x + cardW / 2, y + 16, { align: 'center' });
+  });
+  y += 32;
+
+  // Symptoms
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...COLORS.dark);
+  doc.text('Symptoms Resolved:', 14, y);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(...(fb.symptoms_resolved ? COLORS.green : COLORS.red));
+  doc.text(fb.symptoms_resolved ? 'Yes' : 'No', 56, y);
+  y += 10;
+
+  // Side effects
+  doc.setTextColor(...COLORS.dark);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Reported Side Effects:', 14, y);
+  if (fb.had_side_effects) {
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...COLORS.red);
+    doc.text(`${fb.side_effect_severity || ''} -- ${(fb.side_effects || []).join(', ')}`, 58, y);
+  } else {
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...COLORS.green);
+    doc.text('None reported', 58, y);
+  }
+  y += 18;
+
+  // Note to pharmacy
+  doc.setFillColor(254, 242, 242);
+  doc.setDrawColor(...COLORS.red);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(14, y, w - 28, 22, 2, 2, 'FD');
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...COLORS.red);
+  doc.text('ATTENTION PHARMACY:', 18, y + 8);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(...COLORS.dark);
+  doc.text('Please review the reported adverse effects and medication outcomes', 18, y + 14);
+  doc.text('for internal quality control. This data is strictly anonymous.', 18, y + 19);
+
+  // Footer
+  const h = doc.internal.pageSize.getHeight();
+  doc.setFillColor(...COLORS.lightBg);
+  doc.rect(0, h - 12, w, 12, 'F');
+  doc.setFontSize(8);
+  doc.setTextColor(...COLORS.gray);
+  doc.text('Confidential & Anonymous Pharmacovigilance Report', w / 2, h - 5, { align: 'center' });
+
+  doc.save(`Pharmacy_Alert_${format(new Date(), 'yyyyMMdd_HHmm')}.pdf`);
+}

@@ -6,7 +6,7 @@ import { Pill, Plus, Eye, BarChart2, X, Loader2, Clock, CheckCircle, AlertTriang
 import { format, addDays } from 'date-fns';
 import { toast } from 'sonner';
 import type { HospitalProfile } from '@/hooks/useHospitalContext';
-import { generatePrescriptionPDF, generateFeedbackPDF } from '@/utils/pdfReports';
+import { generatePrescriptionPDF, generateFeedbackPDF, generatePharmacyAlertReportPDF } from '@/utils/pdfReports';
 
 const HospitalPrescriptions = () => {
   const { hospital } = useOutletContext<{ hospital: HospitalProfile | null }>();
@@ -113,7 +113,7 @@ const HospitalPrescriptions = () => {
         form: m.medicine_form,
         timesPerDay: m.times_per_day,
         durationDays: m.duration_days,
-        schedule: m.schedule,
+        schedule: m.schedule as { time: string; label: string; with: string }[] | undefined,
         specialInstructions: m.special_instructions,
       })),
     });
@@ -576,6 +576,10 @@ const FeedbackDrawer = ({ rx, feedback, onClose }: { rx: any; feedback: any | nu
                 <button
                   onClick={() => {
                     toast.success('🔄 Sending feedback report securely to Pharmacy Network...');
+                    generatePharmacyAlertReportPDF({
+                      diagnosis: rx.diagnosis,
+                      feedback,
+                    });
                     setTimeout(() => {
                       toast.success('✅ Patient feedback successfully shared with Pharmacies!');
                     }, 1500);
