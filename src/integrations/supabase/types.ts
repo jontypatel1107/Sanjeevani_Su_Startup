@@ -1193,6 +1193,7 @@ export type Database = {
           insurance_validity_date: string | null
           organ_donor: boolean | null
           past_surgeries: string[] | null
+          past_treatments: Json | null
           phone: string | null
           pin_code: string | null
           profile_photo_url: string | null
@@ -1235,6 +1236,7 @@ export type Database = {
           insurance_validity_date?: string | null
           organ_donor?: boolean | null
           past_surgeries?: string[] | null
+          past_treatments?: Json | null
           phone?: string | null
           pin_code?: string | null
           profile_photo_url?: string | null
@@ -1277,6 +1279,7 @@ export type Database = {
           insurance_validity_date?: string | null
           organ_donor?: boolean | null
           past_surgeries?: string[] | null
+          past_treatments?: Json | null
           phone?: string | null
           pin_code?: string | null
           profile_photo_url?: string | null
