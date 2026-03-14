@@ -114,6 +114,33 @@ const PharmaOverview = () => {
     { label: 'Reported Side Effects', value: reportedSideEffectsCount, icon: AlertCircle, trend: '+5', up: false },
   ];
 
+  // Calculated Adherence Data per Medicine
+  const medAdherence: Record<string, { prescribed: number; taken: number }> = {};
+  medicines.forEach(m => {
+    if (m.prescription_id) {
+      if (!medAdherence[m.medicine_name]) medAdherence[m.medicine_name] = { prescribed: 0, taken: 0 };
+      medAdherence[m.medicine_name].prescribed++;
+    }
+  });
+
+  feedbacks.forEach(f => {
+    if (['Always', 'Mostly'].includes(f.adherence_rating)) {
+      const presMeds = medsByRx[f.prescription_id] || [];
+      presMeds.forEach(mName => {
+        if (medAdherence[mName]) medAdherence[mName].taken++;
+      });
+    }
+  });
+
+  const adherenceChartData = Object.entries(medAdherence)
+    .map(([name, data]) => ({ name: name.slice(0, 15), ...data }))
+    .sort((a, b) => b.prescribed - a.prescribed)
+    .slice(0, 3);
+
+  if (adherenceChartData.length === 0) {
+    adherenceChartData.push({ name: 'No Data', prescribed: 100, taken: 0 });
+  }
+
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
@@ -287,25 +314,21 @@ const PharmaOverview = () => {
               <UserCheck size={18} className="text-[#8B5CF6]" /> Medication Adherence
             </h3>
             <div className="space-y-4">
-              {[
-                { name: 'BP Drug A', prescribed: 500, taken: 420 },
-                { name: 'Diabetes Drug B', prescribed: 300, taken: 210 },
-                { name: 'Antibiotic C', prescribed: 200, taken: 190 },
-              ].map(item => (
+              {adherenceChartData.map(item => (
                 <div key={item.name}>
                   <div className="flex justify-between text-[13px] mb-1">
                     <span className="font-medium text-[#1E293B]">{item.name}</span>
-                    <span className="text-[#64748B]">{Math.round((item.taken/item.prescribed)*100)}% adherence</span>
+                    <span className="text-[#64748B]">{item.prescribed > 0 ? Math.round((item.taken/item.prescribed)*100) : 0}% adherence</span>
                   </div>
                   <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                     <div 
                       className="h-full bg-[#8B5CF6]" 
-                      style={{ width: `${(item.taken/item.prescribed)*100}%` }}
+                      style={{ width: `${item.prescribed > 0 ? (item.taken/item.prescribed)*100 : 0}%` }}
                     />
                   </div>
                   <div className="flex justify-between text-[11px] mt-1 text-[#94A3B8]">
-                    <span>Prescribed: {item.prescribed}</span>
-                    <span>Missed: {item.prescribed - item.taken}</span>
+                    <span>Prescribed to: {item.prescribed} patients</span>
+                    <span>Missed/Low Adherence: {item.prescribed - item.taken}</span>
                   </div>
                 </div>
               ))}
