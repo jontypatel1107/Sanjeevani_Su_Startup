@@ -274,7 +274,7 @@ const LandingPage = () => {
             onPrimary={() => navigate('/patient/signup')}
             secondaryLabel={t('landing.patientLogin')}
             secondaryStyle={{ border: '1.5px solid #0891B2', color: '#0891B2', background: 'white' }}
-            onSecondary={() => navigate('/patient/login')}
+            onSecondary={() => navigate('/login?role=patient')}
             footer={t('landing.patientFooter')}
           />
           {/* Hospital */}
@@ -299,7 +299,7 @@ const LandingPage = () => {
             onPrimary={() => navigate('/register')}
             secondaryLabel={t('landing.hospitalLogin')}
             secondaryStyle={{ border: '1.5px solid #E8A820', color: '#E8A820', background: 'white' }}
-            onSecondary={() => navigate('/hospital/login')}
+            onSecondary={() => navigate('/login?role=hospital')}
             footer={t('landing.hospitalFooter')}
             badge={t('landing.emergencyNetwork')}
           />
@@ -320,7 +320,7 @@ const LandingPage = () => {
             onPrimary={() => navigate('/pharma/registration')}
             secondaryLabel={t('landing.pharmaLogin')}
             secondaryStyle={{ border: '1.5px solid #8B5CF6', color: '#8B5CF6', background: 'white' }}
-            onSecondary={() => navigate('/pharma/login')}
+            onSecondary={() => navigate('/login?role=pharma')}
             footer={t('landing.pharmaFooter')}
           />
           {/* Admin */}

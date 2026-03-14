@@ -6,11 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import HospitalRegistration from "./pages/HospitalRegistration";
 import PatientSignup from "./pages/PatientSignup";
-import PatientLogin from "./pages/PatientLogin";
+import UnifiedLogin from "./pages/UnifiedLogin";
 import ComingSoon from "./pages/ComingSoon";
 import PatientResetPassword from "./pages/PatientResetPassword";
-import HospitalLogin from "./pages/HospitalLogin";
-import PharmaLogin from "./pages/PharmaLogin";
 import PharmaRegistration from "./pages/PharmaRegistration";
 import PharmaDashboardLayout from "./pages/pharma/PharmaDashboardLayout";
 import PharmaOverview from "./pages/pharma/PharmaOverview";
@@ -61,7 +59,10 @@ const App = () => (
           <Route path="/" element={<LandingPage />} />
           <Route path="/register" element={<HospitalRegistration />} />
           <Route path="/patient/signup" element={<PatientSignup />} />
-          <Route path="/patient/login" element={<PatientLogin />} />
+          <Route path="/login" element={<UnifiedLogin />} />
+          <Route path="/patient/login" element={<UnifiedLogin />} />
+          <Route path="/hospital/login" element={<UnifiedLogin />} />
+          <Route path="/pharma/login" element={<UnifiedLogin />} />
           {/* Patient dashboard routes */}
           <Route path="/patient/dashboard" element={<PatientDashboardLayout />}>
             <Route index element={<PatientOverview />} />
@@ -74,7 +75,6 @@ const App = () => (
             <Route path="settings" element={<PatientSettings />} />
           </Route>
           <Route path="/patient/reset-password" element={<PatientResetPassword />} />
-          <Route path="/hospital/login" element={<HospitalLogin />} />
           <Route path="/hospital/pending" element={<HospitalPending />} />
           <Route path="/hospital/rejected" element={<HospitalRejected />} />
           {/* Hospital dashboard routes */}
@@ -93,7 +93,6 @@ const App = () => (
             <Route path="documents" element={<HospitalDocuments />} />
             <Route path="settings" element={<HospitalSettings />} />
           </Route>
-          <Route path="/pharma/login" element={<PharmaLogin />} />
           <Route path="/pharma/registration" element={<PharmaRegistration />} />
           {/* Pharma dashboard routes */}
           <Route path="/pharma/dashboard" element={<PharmaDashboardLayout />}>
